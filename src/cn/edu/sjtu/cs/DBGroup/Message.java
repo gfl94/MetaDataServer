@@ -7,16 +7,28 @@ import java.io.Serializable;
  */
 public class Message implements Serializable{
     public int header;
-
     public FileMetaData metaData;
+    public String response;
+
+    public Message(int header, FileMetaData data, String response){
+        this.header = header;
+        this.metaData = data;
+        this.response = response;
+    }
 
     public Message(int header, FileMetaData meta){
-        this.header = header;
-        this.metaData = meta;
+        this(header, meta, null);
+    }
+
+    public Message(int header, String response){
+        this(header, null, response);
+    }
+
+    public Message(int header){
+        this(header, null, null);
     }
 
     public Message(){
-        this.header = MessageHeader.OK;
-        this.metaData = null;
+        this(MessageHeader.OK, null, null);
     }
 }

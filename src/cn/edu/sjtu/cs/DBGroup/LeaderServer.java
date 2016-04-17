@@ -71,7 +71,8 @@ public class LeaderServer {
                         if (message.header == MessageHeader.CLIENTADD){
                             addElement(message.metaData);
                         } else if (message.header == MessageHeader.CLIENTTRAVERSE){
-                            travese();
+                            Message responese = travese();
+                            out.writeObject(responese);
                         } else if (message.header == MessageHeader.CLIENTREMOVE){
                             removeElement(message.metaData);
                         }
@@ -139,16 +140,18 @@ public class LeaderServer {
         return true;
     }
 
-    public boolean travese(){
+    public Message travese(){
+        StringBuilder sb = new StringBuilder();
         for (String key : metaStorage.keySet()){
-            System.out.print(key + "  ");
+            sb.append(key + "  ");
             int [] tmp = metaStorage.get(key);
-            for (int i : tmp)
-                System.out.print(i + "  ");
-            System.out.println();
+            for (int i : tmp){
+                sb.append(i + " ");
+            }
+            sb.append("\n");
         }
         for (int i = 0; i < numberOfFollower; ++i)
-            leaderHandler.sendMessage(new Message(MessageHeader.TRAVERSE, null), i);
-        return true;
+            leaderHandler.sendMessage(new Message(MessageHeader.TRAVERSE), i);
+        return new Message(MessageHeader.CLIENTTRAVERSERESPONSE, sb.toString());
     }
 }

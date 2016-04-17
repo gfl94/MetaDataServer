@@ -18,4 +18,5 @@ public class MessageHeader implements Serializable {
     public static final int CLIENTADD = 11;
     public static final int CLIENTTRAVERSE = 12;
     public static final int CLIENTREMOVE = 13;
+    public static final int CLIENTTRAVERSERESPONSE = 14;
 }
