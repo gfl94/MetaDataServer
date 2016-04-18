@@ -23,11 +23,12 @@ public class FollowerServerMessageHandler extends Thread{
             socket = new Socket(SERVER_ADDRESS, PORT);
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
-            System.out.println(System.currentTimeMillis());
-            sendMessage(new Message(MessageHeader.PING, null));
-            Message response = new Message(MessageHeader.OK, null);
+//            System.out.println(System.currentTimeMillis());
+            sendMessage(new Message(MessageHeader.PING));
+            Message response = new Message(MessageHeader.OK);
             if (waitForMessage(response) && response.header == MessageHeader.PONG)
-                System.out.println(System.currentTimeMillis());
+                System.out.println("Connected to server");
+//                System.out.println(System.currentTimeMillis());
         } catch (IOException e){
             e.printStackTrace();
             return false;

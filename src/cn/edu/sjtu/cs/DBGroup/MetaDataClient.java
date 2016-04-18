@@ -2,21 +2,66 @@ package cn.edu.sjtu.cs.DBGroup;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Map;
 
 /**
  * Created by gefei on 16-4-16.
  */
 public class MetaDataClient {
-    public static void main(String[] args) throws IOException{
-        Socket socket = new Socket("localhost", LeaderServer.ClientPort);
+    private Socket socket;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+    public MetaDataClient(String host, int port){
+        try{
+            socket = new Socket(host, port);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(Message message){
+        try{
+            out.writeObject(message);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public Message waitForMessage(){
+        while (true){
+            try {
+                Object object = in.readObject();
+                if (object != null) {
+                    Message m = (Message) object;
+                    return m;
+                }
+            }catch(IOException ioe){
+                ioe.printStackTrace();
+            }catch (ClassNotFoundException cfe){
+                cfe.printStackTrace();
+            }
+        }
+    }
+
+    public void handleMessage(Message message){
+        if (message.header == MessageHeader.OK)
+            log("Operation finished");
+        else if (message.header <= 24 && message.header >= 21) // an ugly hacker
+            log(MessageHeader.CLIENT_RESPONSE[message.header - MessageHeader.CLIENT_RESPONSE_BASE]);
+    }
+
+    private void output(String content){
+        System.out.println("STDOUT: " + content);
+    }
+
+    private void log(String content){
+        System.out.println("STDERR: " + content);
+    }
+
+    public static void main(String[] args) throws IOException{
+        MetaDataClient client = new MetaDataClient(LeaderServer.HostAddress, LeaderServer.ClientPort);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -27,42 +72,33 @@ public class MetaDataClient {
             FileMetaData data;
 
             if (oper == 1){
-                System.out.println("traverse");
-                out.writeObject(new Message(MessageHeader.CLIENTTRAVERSE));
-                boolean received = false;
-                while (!received){
-                    try {
-                        Object object = in.readObject();
-                        Message m = (Message) object;
-                        if (m.header == MessageHeader.CLIENTTRAVERSERESPONSE){
-                            System.out.println(m.response);
-                            received = true;
-                        }
-                    } catch (ClassNotFoundException e){
-                        e.printStackTrace();
-                    }
-                }
+                System.out.println("traverse: ");
+                client.sendMessage(new Message(MessageHeader.CLIENT_TRAVERSE));
+                Message response = client.waitForMessage();
+                System.out.println(response.content);
                 continue;
             }
 
             // Other operations
-            while (true) {
-                System.out.print("Enter filename: ");
-                filename = br.readLine();
-                try {
-                    data = new FileMetaData(filename);
-                    break;
-                } catch (NoSuchFieldError e) {
-                    e.printStackTrace();
-                }
-            }
+            System.out.print("Enter filename: ");
+            filename = br.readLine();
 
             if (oper == 2){
-                System.out.println("Add");
-                out.writeObject(new Message(MessageHeader.CLIENTADD, data));
+                System.out.println("Add Directory");
+                client.sendMessage(new Message(MessageHeader.CLIENT_MAKE_DIRECTORY, filename));
+                client.handleMessage(client.waitForMessage());
             } else if (oper == 3){
-                System.out.println("remove");
-                out.writeObject(new Message(MessageHeader.CLIENTREMOVE, data));
+                System.out.println("Add File");
+                client.sendMessage(new Message(MessageHeader.CLIENT_CREATE_FILE, filename));
+                client.handleMessage(client.waitForMessage());
+            } else if (oper == 4){
+                System.out.println("remove Directory");
+                client.sendMessage(new Message(MessageHeader.CLIENT_REMOVE_DIRECTORY, filename));
+                client.handleMessage(client.waitForMessage());
+            } else if (oper == 5){
+                System.out.println("remove file");
+                client.sendMessage(new Message(MessageHeader.CLIENT_REMOVE_FILE, filename));
+                client.handleMessage(client.waitForMessage());
             }
         }
 

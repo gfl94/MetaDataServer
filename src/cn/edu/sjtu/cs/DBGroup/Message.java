@@ -8,12 +8,12 @@ import java.io.Serializable;
 public class Message implements Serializable{
     public int header;
     public FileMetaData metaData;
-    public String response;
+    public String content;
 
     public Message(int header, FileMetaData data, String response){
         this.header = header;
         this.metaData = data;
-        this.response = response;
+        this.content = response;
     }
 
     public Message(int header, FileMetaData meta){

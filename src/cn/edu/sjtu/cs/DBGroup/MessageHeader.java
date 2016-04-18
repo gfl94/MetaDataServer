@@ -15,8 +15,24 @@ public class MessageHeader implements Serializable {
     public final static int TRAVERSE = 6;
     public static final int REMOVE = 7;
 
-    public static final int CLIENTADD = 11;
-    public static final int CLIENTTRAVERSE = 12;
-    public static final int CLIENTREMOVE = 13;
-    public static final int CLIENTTRAVERSERESPONSE = 14;
+
+    public static final int CLIENT_CREATE_FILE = 11;
+    public static final int CLIENT_MAKE_DIRECTORY = 12;
+    public static final int CLIENT_REMOVE_FILE = 13;
+    public static final int CLIENT_REMOVE_DIRECTORY = 14;
+    public static final int CLIENT_TRAVERSE = 15;
+
+    public static final int CLIENT_CREATE_FILE_FAILURE = 21;
+    public static final int CLIENT_MAKE_DIRECTORY_FAILURE = 22;
+    public static final int CLIENT_REMOVE_FILE_FAILURE = 23;
+    public static final int CLIENT_REMOVE_DIRECTORY_FAILURE = 24;
+    public static final int CLIENT_TRAVERSE_RESPONSE = 25;
+
+    public static final int CLIENT_RESPONSE_BASE = 21;
+    public static final String[] CLIENT_RESPONSE = {
+            "File creation failure",
+            "Directory creation failure",
+            "File remove failure",
+            "Directory remove failure"
+    };
 }

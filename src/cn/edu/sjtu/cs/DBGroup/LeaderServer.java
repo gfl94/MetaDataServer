@@ -6,6 +6,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -19,8 +22,10 @@ public class LeaderServer {
     private int current;
 
     public static final int ClientPort = 5566;
+    public static final String HostAddress = "localhost";
 
     private HashMap<String, int[]> metaStorage;
+    private DirectoryTree dt = new DirectoryTree();
 
     public void setNumberOfFollower(int number){
         this.numberOfFollower = number;
@@ -68,13 +73,29 @@ public class LeaderServer {
                     while(true){
                         Object object = in.readObject();
                         Message message = (Message) object;
-                        if (message.header == MessageHeader.CLIENTADD){
-                            addElement(message.metaData);
-                        } else if (message.header == MessageHeader.CLIENTTRAVERSE){
-                            Message responese = travese();
-                            out.writeObject(responese);
-                        } else if (message.header == MessageHeader.CLIENTREMOVE){
-                            removeElement(message.metaData);
+                        if (message.header == MessageHeader.CLIENT_CREATE_FILE){
+                            if (!addElement(message.content, false))
+                                out.writeObject(new Message(MessageHeader.CLIENT_CREATE_FILE_FAILURE));
+                            else
+                                out.writeObject(new Message(MessageHeader.OK));
+                        } else if (message.header == MessageHeader.CLIENT_MAKE_DIRECTORY){
+                            if (!addElement(message.content, true))
+                                out.writeObject(new Message(MessageHeader.CLIENT_MAKE_DIRECTORY_FAILURE));
+                            else
+                                out.writeObject(new Message(MessageHeader.OK));
+                        } else if (message.header == MessageHeader.CLIENT_TRAVERSE){
+                            Message response = travese();
+                            out.writeObject(response);
+                        } else if (message.header == MessageHeader.CLIENT_REMOVE_DIRECTORY){
+                            if (!removeElement(message.content, true))
+                                out.writeObject(new Message(MessageHeader.CLIENT_REMOVE_DIRECTORY_FAILURE));
+                            else
+                                out.writeObject(new Message(MessageHeader.OK));
+                        } else if (message.header == MessageHeader.CLIENT_REMOVE_FILE){
+                            if (removeElement(message.content, false))
+                                out.writeObject(new Message(MessageHeader.CLIENT_REMOVE_FILE_FAILURE));
+                            else
+                                out.writeObject(new Message(MessageHeader.OK));
                         }
                     }
                 }catch (ClassNotFoundException e){
@@ -114,44 +135,58 @@ public class LeaderServer {
         return result;
     }
 
-    public synchronized boolean addElement(FileMetaData data){
+    public synchronized boolean addElement(String filename, boolean isDirectory){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        FileMetaData data =new FileMetaData(filename, isDirectory, dateFormat.format(new Date()));
+
+        // TODO  dt return false handler???????
+        if (isDirectory)
+            dt.mkdir(data.filename, data);
+        else
+            dt.createFile(data.filename, data);
+
         int[] positions = pickFollowerToStore();
         for (int i = 0; i < Replicants; ++i){
             leaderHandler.sendMessage(new Message(MessageHeader.ADD, data), positions[i]);
         }
-        System.out.print("Position: ");
-        for (int i = 0; i < Replicants; ++i){
-            System.out.print(positions[i] + "   ");
-        }
-        System.out.println();
         metaStorage.put(data.filename, positions);
         return true;
     }
 
-    public synchronized boolean removeElement(FileMetaData data){
-        if (!metaStorage.containsKey(data.filename)){
+    public synchronized boolean removeElement(String path, boolean isDirectory){
+        if (!metaStorage.containsKey(path)){
             return false;
         }
-        int [] pos = metaStorage.get(data.filename);
+
+        FileMetaData data = dt.getFileMetaData(path);
+        if (data == null) return false;
+
+        boolean result = true;
+        if (isDirectory) result = dt.rmdir(path);
+        else result = dt.removeFile(path);
+        if (!result) return false;
+
+        int [] pos = metaStorage.get(path);
         for (int i : pos){
             leaderHandler.sendMessage(new Message(MessageHeader.REMOVE, data), i);
         }
-        metaStorage.remove(data.filename);
+        metaStorage.remove(path);
         return true;
     }
 
     public Message travese(){
-        StringBuilder sb = new StringBuilder();
-        for (String key : metaStorage.keySet()){
-            sb.append(key + "  ");
-            int [] tmp = metaStorage.get(key);
-            for (int i : tmp){
-                sb.append(i + " ");
-            }
-            sb.append("\n");
-        }
-        for (int i = 0; i < numberOfFollower; ++i)
-            leaderHandler.sendMessage(new Message(MessageHeader.TRAVERSE), i);
-        return new Message(MessageHeader.CLIENTTRAVERSERESPONSE, sb.toString());
+//        StringBuilder sb = new StringBuilder();
+//        for (String key : metaStorage.keySet()){
+//            sb.append(key + "  ");
+//            int [] tmp = metaStorage.get(key);
+//            for (int i : tmp){
+//                sb.append(i + " ");
+//            }
+//            sb.append("\n");
+//        }
+//        for (int i = 0; i < numberOfFollower; ++i)
+//            leaderHandler.sendMessage(new Message(MessageHeader.TRAVERSE), i);
+//        return new Message(MessageHeader.CLIENT_TRAVERSE_RESPONSE, sb.toString());
+        return new Message(MessageHeader.CLIENT_TRAVERSE_RESPONSE, dt.traverse());
     }
 }

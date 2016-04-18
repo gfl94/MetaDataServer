@@ -67,13 +67,13 @@ public class LeaderServerMessageHandler {
     }
 
     public Message sendMessage(Message message, int number){
-        if (number >= numberOfFollower) return new Message(MessageHeader.BAD, null);
+        if (number >= numberOfFollower) return new Message(MessageHeader.BAD);
         System.out.println("[DEBUG] to " + number + " " +message.header);
         Handler handler = handlers[number];
         handler.sendMessage(message);
 //        Message response = new Message();
 //        handler.waitForMessage(response);
-        return new Message(MessageHeader.OK, null);
+        return new Message(MessageHeader.OK);
     }
 
 
@@ -155,7 +155,7 @@ public class LeaderServerMessageHandler {
                     if (object == null) continue;
                     Message message = (Message) object;
                     if (message.header == MessageHeader.PING)
-                        out.writeObject(new Message(MessageHeader.PONG, null));
+                        out.writeObject(new Message(MessageHeader.PONG));
                     out.writeObject(handleMessage(message));
                 }
             } catch (IOException ioe){
