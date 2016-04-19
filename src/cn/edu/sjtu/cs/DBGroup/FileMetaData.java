@@ -20,24 +20,6 @@ public class FileMetaData implements Serializable{
     public String modifiedTime;
     public String permissions;
 
-//    public FileMetaData(String filePath){
-//        File file = new File(filePath);
-//        Path path = file.toPath();
-//        try{
-//            PosixFileAttributes attrs = Files.readAttributes(path, PosixFileAttributes.class);
-//            this.filename = file.getAbsolutePath();
-//            this.isDirectory = attrs.isDirectory();
-//            this.isRegularFile = attrs.isRegularFile();
-//            this.isSymbolicLink = attrs.isSymbolicLink();
-//            this.createTime = attrs.creationTime().toString();
-//            this.accessTime = attrs.lastAccessTime().toString();
-//            this.modifiedTime = attrs.lastModifiedTime().toString();
-//            this.permissions = attrs.permissions().toString();
-//        }catch (IOException e){
-//            e.printStackTrace();
-//        }
-//    }
-
     public FileMetaData(String filename, boolean isDirectory, boolean isRegularFile,
                         boolean isSymbolicLink, String createTime, String accessTime,
                         String modifiedTime, String permissions){
@@ -53,5 +35,15 @@ public class FileMetaData implements Serializable{
 
     public FileMetaData(String filename, boolean isDirectory, String createTime){
         this(filename, isDirectory, true, false, createTime, createTime, createTime, "");
+    }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("filename: " + filename + "\n");
+        sb.append("isDirectory: " + isDirectory + "\tisRegularFile: " + isRegularFile + "\tisSymbolicLink: " + isSymbolicLink + "\n");
+        sb.append("createTime: " + createTime + "\n");
+        sb.append("accessTime: " + accessTime + "\n");
+        sb.append("modifiedTime: " + modifiedTime + "\n");
+        return sb.toString();
     }
 }

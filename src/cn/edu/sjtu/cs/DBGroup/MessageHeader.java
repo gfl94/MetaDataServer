@@ -39,4 +39,6 @@ public class MessageHeader implements Serializable {
     };
 
     public static final int CLIENT_META_DIST = 30;
+    public static final int CLIENT_META_REQUEST = 31;
+    public static final int CLIENT_META_DIST_RESPONSE = 32;
 }

@@ -80,6 +80,13 @@ public class MetaDataClient {
         System.out.println(response.content);
     }
 
+    public void printMetaInfo(String path){
+        System.out.println("printMetaInfo");
+        sendMessage(new Message(MessageHeader.CLIENT_META_REQUEST, path));
+        FileMetaData metaData = waitForMessage().metaData;
+        System.out.println(metaData.toString());
+    }
+
     public boolean mkdir(String dirPath){
         System.out.println("Add Directory");
         sendMessage(new Message(MessageHeader.CLIENT_MAKE_DIRECTORY, dirPath));
@@ -132,6 +139,8 @@ public class MetaDataClient {
             traverse();
         else if (command.equals("metadist"))
             printMetaDist();
+        else if (command.equals("stat"))
+            printMetaInfo(path);
         else{
             System.out.println("Command not recognised");
         }

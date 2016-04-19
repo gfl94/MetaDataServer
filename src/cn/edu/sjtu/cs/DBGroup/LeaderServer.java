@@ -100,7 +100,7 @@ public class LeaderServer {
                             else
                                 out.writeObject(new Message(MessageHeader.OK));
                         } else if (message.header == MessageHeader.CLIENT_REMOVE_FILE){
-                            if (removeElement(message.content, false))
+                            if (!removeElement(message.content, false))
                                 out.writeObject(new Message(MessageHeader.CLIENT_REMOVE_FILE_FAILURE));
                             else
                                 out.writeObject(new Message(MessageHeader.OK));
@@ -112,6 +112,8 @@ public class LeaderServer {
                                 out.writeObject(new Message(MessageHeader.BAD));
                         } else if (message.header == MessageHeader.CLIENT_META_DIST){
                             out.writeObject(new Message(MessageHeader.CLIENT_META_DIST, printMetaInfoDist()));
+                        } else if (message.header == MessageHeader.CLIENT_META_REQUEST){
+                            out.writeObject(new Message(MessageHeader.CLIENT_META_DIST_RESPONSE, printMetaInfo(message.content)));
                         }
                     }
                 }catch (ClassNotFoundException e){
@@ -178,7 +180,7 @@ public class LeaderServer {
         FileMetaData data = dt.getFileMetaData(path);
         if (data == null) return false;
 
-        boolean result = true;
+        boolean result;
         if (isDirectory) result = dt.rmdir(path);
         else result = dt.removeFile(path);
         if (!result) return false;
@@ -209,5 +211,9 @@ public class LeaderServer {
                 sb.append(i + "  ");
         }
         return sb.toString();
+    }
+
+    public FileMetaData printMetaInfo(String path){
+        return dt.getFileMetaData(path);
     }
 }
