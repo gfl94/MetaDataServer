@@ -21,12 +21,14 @@ public class MessageHeader implements Serializable {
     public static final int CLIENT_REMOVE_FILE = 13;
     public static final int CLIENT_REMOVE_DIRECTORY = 14;
     public static final int CLIENT_TRAVERSE = 15;
+    public static final int CLIENT_LS = 16;
 
     public static final int CLIENT_CREATE_FILE_FAILURE = 21;
     public static final int CLIENT_MAKE_DIRECTORY_FAILURE = 22;
     public static final int CLIENT_REMOVE_FILE_FAILURE = 23;
     public static final int CLIENT_REMOVE_DIRECTORY_FAILURE = 24;
     public static final int CLIENT_TRAVERSE_RESPONSE = 25;
+    public static final int CLIENT_LS_RESPONSE = 25;
 
     public static final int CLIENT_RESPONSE_BASE = 21;
     public static final String[] CLIENT_RESPONSE = {
@@ -35,4 +37,6 @@ public class MessageHeader implements Serializable {
             "File remove failure",
             "Directory remove failure"
     };
+
+    public static final int CLIENT_META_DIST = 30;
 }

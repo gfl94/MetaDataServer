@@ -1,9 +1,5 @@
 package cn.edu.sjtu.cs.DBGroup;
 
-import java.nio.file.attribute.FileTime;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -12,32 +8,10 @@ import java.util.Queue;
  */
 public class DirectoryTree{
 
-//    public static void main(String[] args){
-//        DirectoryTree dt = new DirectoryTree();
-//        System.out.println(dt.traverse());
-//
-//        dt.mkdir("/hello");
-//        dt.createFile("/hello/world");
-//        dt.createFile("/hello/world");
-//        dt.mkdir("/hello/gegege");
-//        dt.createFile("/hello/gefei");
-//        dt.createFile("/hello/gegege/dsfsafas");
-//        dt.createFile("/hello/gegege/dassss");
-//
-//        dt.mkdir("/kdfjdis/dfdks");
-//        dt.createFile("/hello");
-//        System.out.println(dt.traverse());
-//
-//        System.out.println("*******************************");
-//        dt.traverseSingleNode("/hello/gegege");
-//
-//        System.out.println("Finished. Main function ends");
-//    }
-
     // for ls command
-    public void traverseSingleNode(String path){
+    public String traverseSingleNode(String path){
         TreeNode p = findNode(path);
-        if (p == null) return;
+        if (p == null) return null;
         StringBuilder sb = new StringBuilder();
         if (!p.metadata.isDirectory)
             sb.append(p.nodename);
@@ -49,7 +23,7 @@ public class DirectoryTree{
             }
             sb.append("\n");
         }
-        output(sb.toString());
+        return (sb.toString());
     }
 
     //for mkdir command

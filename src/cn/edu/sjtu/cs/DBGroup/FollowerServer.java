@@ -10,6 +10,10 @@ public class FollowerServer {
     private int current;
     public FollowerServerMessageHandler followerHandler = null;
 
+    public static void main(String[] args){
+        FollowerServer follower = new FollowerServer();
+    }
+
     public FollowerServer(){
         metaDatas = new FileMetaData[STORAGETHRESHOLD];
         current = 0;
